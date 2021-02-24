@@ -287,7 +287,7 @@ inline QPoint globalPositionOf(QMouseEvent* ev)
  * param[in] StandardPixmap The standard pixmap to be used for the button
  * param[in] CustomIconId The identifier for the custom icon.
  */
-void setButtonIcon(QAbstractButton* Button, QStyle::StandardPixmap StandarPixmap,
+void ADS_EXPORT setButtonIcon(QAbstractButton* Button, QStyle::StandardPixmap StandarPixmap,
 	ads::eIcon CustomIconId);
 
 

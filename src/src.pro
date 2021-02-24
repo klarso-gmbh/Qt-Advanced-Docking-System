@@ -1,11 +1,15 @@
-ADS_OUT_ROOT = $${OUT_PWD}/..
 CONFIG += c++14
 CONFIG += debug_and_release
 TARGET = $$qtLibraryTarget(qtadvanceddocking)
 DEFINES += QT_DEPRECATED_WARNINGS
 TEMPLATE = lib
-DESTDIR = $${ADS_OUT_ROOT}/lib
 QT += core gui widgets
+
+win32:CONFIG += force_debug_info
+
+win32 {
+	include($$PWD/../../../../Global/QksoDest.pri)
+}
 
 !adsBuildStatic {
 	CONFIG += shared
@@ -79,7 +83,6 @@ LIBS += -lxcb
 
 isEmpty(PREFIX){
 	PREFIX=../installed
-	warning("Install Prefix not set")
 }
 headers.path=$$PREFIX/include
 headers.files=$$HEADERS

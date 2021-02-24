@@ -142,6 +142,9 @@ protected:
      */
     bool closeDockWidgetInternal(bool ForceClose = false);
 
+	// take widget helper, that removes the widget without reparenting it..
+	QWidget* takeWidgetInternal();
+
 public:
     using Super = QFrame;
 

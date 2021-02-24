@@ -268,9 +268,14 @@ void CDockWidget::setWidget(QWidget* widget, eInsertMode InsertMode)
 {
 	if (d->Widget)
 	{
-		takeWidget();
+		QWidget* w = takeWidgetInternal();
+		if (w)
+		{
+			delete w;
+		}
 	}
 
+	if (widget) {
 	auto ScrollAreaWidget = qobject_cast<QAbstractScrollArea*>(widget);
 	if (ScrollAreaWidget || ForceNoScrollArea == InsertMode)
 	{
@@ -289,10 +294,11 @@ void CDockWidget::setWidget(QWidget* widget, eInsertMode InsertMode)
 	d->Widget = widget;
 	d->Widget->setProperty("dockWidgetContent", true);
 }
+}
 
 
 //============================================================================
-QWidget* CDockWidget::takeWidget()
+QWidget* CDockWidget::takeWidgetInternal()
 {
 	QWidget* w = nullptr;
 	if (d->ScrollArea)
@@ -309,7 +315,12 @@ QWidget* CDockWidget::takeWidget()
 		w = d->Widget;
 		d->Widget = nullptr;
 	}
+	return w;
+}
 
+QWidget* CDockWidget::takeWidget()
+{
+	QWidget* w = takeWidgetInternal();
 	if (w)
 	{
 		w->setParent(nullptr);

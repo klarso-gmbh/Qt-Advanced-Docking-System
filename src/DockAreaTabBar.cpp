@@ -244,7 +244,7 @@ void CDockAreaTabBar::removeTab(CDockWidgetTab* Tab)
 		// First we walk to the right to search for the next visible tab
 		for (int i = (RemoveIndex + 1); i < count(); ++i)
 		{
-			if (tab(i)->isVisibleTo(this))
+			if (tab(i) && tab(i)->isVisibleTo(this))
 			{
 				NewCurrentIndex = i - 1;
 				break;
@@ -257,7 +257,7 @@ void CDockAreaTabBar::removeTab(CDockWidgetTab* Tab)
 		{
 			for (int i = (RemoveIndex - 1); i >= 0; --i)
 			{
-				if (tab(i)->isVisibleTo(this))
+				if (tab(i) && tab(i)->isVisibleTo(this))
 				{
 					NewCurrentIndex = i;
 					break;
@@ -422,7 +422,7 @@ void CDockAreaTabBar::onTabWidgetMoved(const QPoint& GlobalPos)
 //===========================================================================
 void CDockAreaTabBar::closeTab(int Index)
 {
-	if (Index < 0 || Index >= count())
+	if (Index < 0 || Index >= count() || !tab(Index))
 	{
 		return;
 	}

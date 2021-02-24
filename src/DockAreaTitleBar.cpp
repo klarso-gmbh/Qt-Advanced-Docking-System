@@ -389,7 +389,6 @@ void CDockAreaTitleBar::onTabsMenuActionTriggered(QAction* Action)
 //============================================================================
 void CDockAreaTitleBar::updateDockWidgetActionsButtons()
 {
-	CDockWidget* DockWidget = d->TabBar->currentTab()->dockWidget();
 	if (!d->DockWidgetActionsButtons.isEmpty())
 	{
 		for (auto Button : d->DockWidgetActionsButtons)
@@ -399,6 +398,11 @@ void CDockAreaTitleBar::updateDockWidgetActionsButtons()
 		}
 		d->DockWidgetActionsButtons.clear();
 	}
+
+	CDockWidgetTab* ct = d->TabBar->currentTab();
+	if (!ct) return;
+	CDockWidget* DockWidget = ct->dockWidget();
+	if (!DockWidget) return;
 
 	auto Actions = DockWidget->titleBarActions();
 	if (Actions.isEmpty())
@@ -423,7 +427,7 @@ void CDockAreaTitleBar::updateDockWidgetActionsButtons()
 //============================================================================
 void CDockAreaTitleBar::onCurrentTabChanged(int Index)
 {
-	if (Index < 0)
+	if (Index < 0 || !d->TabBar->tab(Index))
 	{
 		return;
 	}

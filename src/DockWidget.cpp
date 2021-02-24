@@ -231,6 +231,8 @@ CDockWidget::CDockWidget(const QString &title, QWidget *parent) :
 	setObjectName(title);
 
 	d->TabWidget = componentsFactory()->createDockWidgetTab(this);
+	d->TabWidget->setParent(parent);
+
     d->ToggleViewAction = new QAction(title, this);
 	d->ToggleViewAction->setCheckable(true);
 	connect(d->ToggleViewAction, SIGNAL(triggered(bool)), this,

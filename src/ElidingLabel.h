@@ -48,6 +48,8 @@ class ADS_EXPORT CElidingLabel : public QLabel
 	Q_OBJECT
 private:
 	ElidingLabelPrivate* d;
+	QLabel* m_fullTextLabel;
+
 	friend struct ElidingLabelPrivate;
 
 protected:

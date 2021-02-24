@@ -29,7 +29,7 @@
 //============================================================================
 #include "ElidingLabel.h"
 #include <QMouseEvent>
-
+#include <QTextDocument>
 
 namespace ads
 {
@@ -65,13 +65,59 @@ void ElidingLabelPrivate::elideText(int Width)
 		return;
 	}
     QFontMetrics fm = _this->fontMetrics();
-    QString  str = fm.elidedText(Text, ElideMode, Width - _this->margin() * 2 - _this->indent());
+
+	QTextDocument doc;
+	doc.setHtml(Text);
+	QString plain = doc.toPlainText();
+
+    QString str = fm.elidedText(plain, ElideMode, Width - _this->margin() * 2 - _this->indent());
     if (str == "…")
     {
-    	str = Text.at(0);
+        str = plain.at(0);
     }
     bool WasElided = IsElided;
-    IsElided = str != Text;
+    IsElided = str != plain;
+
+	if (IsElided)
+	{
+		if (plain != Text)
+		{
+			if (str.endsWith("…")) str.chop(1);
+			// find end-position of elided plaintext in html.. no unescaped <> allowed..
+			bool inTag = false;
+			int j = 0;
+			for (int i=0;i<Text.length();++i)
+			{
+				if (Text[i] == '<') {
+					inTag = true;
+				} else
+				if (Text[i] == '>') {
+					inTag = false;
+				} else
+				if (inTag) {
+				} else
+				if (Text[i] == str[j]) {
+					++j;
+					if (j == str.length()) {
+						j = i;
+						break;
+					}
+				} else {
+					// something is strange => ignore html, just show plaintext.
+					qWarning() << "ElidingLabelPrivate HTML elide failed" << i << str << Text;
+					j = -1;
+					break;
+				}
+			}
+			if (j > -1) {
+				str = Text.left(j+1) + "…";
+				qDebug() << "Elided HTML" << str << j;
+			}
+		}
+	} else {
+		str = Text;
+	}
+
     if(IsElided != WasElided)
     {
         Q_EMIT _this->elidedChanged(IsElided);
@@ -82,8 +128,7 @@ void ElidingLabelPrivate::elideText(int Width)
 
 //============================================================================
 CElidingLabel::CElidingLabel(QWidget* parent, Qt::WindowFlags f)
-	: QLabel(parent, f),
-	  d(new ElidingLabelPrivate(this))
+	: CElidingLabel(QString(), parent, f)
 {
 
 }
@@ -94,8 +139,13 @@ CElidingLabel::CElidingLabel(const QString& text, QWidget* parent, Qt::WindowFla
 	: QLabel(text, parent,f),
 	  d(new ElidingLabelPrivate(this))
 {
+	// offscreen label for correct unelided sizehint even in complex situations..
+	m_fullTextLabel = new QLabel(this);
+	m_fullTextLabel->hide();
+	m_fullTextLabel->setText(text);
 	d->Text = text;
 	internal::setToolTip(this, text);
+	this->setTextInteractionFlags(Qt::NoTextInteraction);
 }
 
 
@@ -185,28 +235,14 @@ QSize CElidingLabel::minimumSizeHint() const
 //============================================================================
 QSize CElidingLabel::sizeHint() const
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-    bool HasPixmap = !pixmap().isNull();
-#else
-    bool HasPixmap = (pixmap() != nullptr);
-#endif
-    if (HasPixmap || d->isModeElideNone())
-    {
-        return QLabel::sizeHint();
-    }
-    const QFontMetrics& fm = fontMetrics();
-    #if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
-        QSize size(fm.horizontalAdvance(d->Text), QLabel::sizeHint().height());
-    #else
-        QSize size(fm.width(d->Text), QLabel::sizeHint().height());
-    #endif
-	return size;
+	return m_fullTextLabel->sizeHint();
 }
 
 
 //============================================================================
 void CElidingLabel::setText(const QString &text)
 {
+	m_fullTextLabel->setText(text);
 	d->Text = text;
 	if (d->isModeElideNone())
 	{

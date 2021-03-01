@@ -897,6 +897,9 @@ bool CDockWidget::closeDockWidgetInternal(bool ForceClose)
 void CDockWidget::setTitleBarActions(QList<QAction*> actions)
 {
 	d->TitleBarActions = actions;
+	if (d->DockArea && d->DockArea->titleBar()) {
+		d->DockArea->titleBar()->updateDockWidgetActionsButtons();
+	}
 }
 
 

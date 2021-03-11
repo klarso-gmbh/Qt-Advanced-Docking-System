@@ -294,7 +294,7 @@ int CDockAreaTabBar::currentIndex() const
 //===========================================================================
 CDockWidgetTab* CDockAreaTabBar::currentTab() const
 {
-	if (d->CurrentIndex < 0)
+	if (!d || !d->TabsLayout || d->CurrentIndex < 0 || d->CurrentIndex >= d->TabsLayout->count())
 	{
 		return nullptr;
 	}
